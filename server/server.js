@@ -7,6 +7,9 @@ const express = require('express');
 // Import cors to allow requests from the frontend
 const cors = require('cors');
 
+// Import the MongoDB connection function
+const connectDB = require('./config/db');
+
 // Create an Express application
 const app = express();
 
@@ -25,7 +28,22 @@ app.get('/', (req, res) => {
   res.send('🚀 Welcome to StudyOrbit Backend!');
 });
 
-// Start the server and listen on the chosen port
-app.listen(PORT, () => {
-  console.log(`StudyOrbit server is running at http://localhost:${PORT}`);
-});
+// Connect to MongoDB before starting the server
+const startServer = async () => {
+  try {
+    // Wait until MongoDB is connected successfully
+    await connectDB();
+
+    // Start the server only after the database connection works
+    app.listen(PORT, () => {
+      console.log(`StudyOrbit server is running at http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    // If the database connection fails, do not start the server
+    console.error('Failed to start server:', error.message);
+    process.exit(1);
+  }
+};
+
+// Start the app
+startServer();
